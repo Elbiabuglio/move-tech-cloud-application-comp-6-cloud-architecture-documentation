@@ -37,3 +37,16 @@ graph TD
 - **Latência P95:** ≤ 500 ms
 - **Vazão Alvo (RPS):** compatível com 20 VUs simultâneos (padrão do teste de carga k6), escalável via HPA até 6 réplicas
 - **Teto de Custo (FinOps):** R$ 150,00/mês (estimativa de referência para a operação da solução)
+
+## 4. Análise de Trade-offs e Próximos Passos
+
+### Trade-offs das Decisões Tomadas
+- **Custo:** optar por serviços gerenciados (banco de dados, LoadBalancer) reduz esforço operacional, mas tem custo direto maior que alternativas self-hosted dentro do cluster. O componente de maior peso no custo observado foi o próprio cluster Kubernetes (control plane e nós).
+- **Escalabilidade:** o HPA permite escalonamento automático de 2 a 6 réplicas por CPU, cobrindo picos de demanda sem intervenção manual — porém a granularidade é de toda a API (monolito), não de partes específicas do sistema.
+- **Disponibilidade:** o mínimo de 2 réplicas garante tolerância a falha de 1 pod, mas a arquitetura ainda depende de uma única região/zona e de um único banco de dados gerenciado, sem redundância multi-zona configurada.
+
+### Pontos de Melhoria e Próximos Passos
+- Avaliar a adoção de um Ingress Controller caso o número de serviços expostos cresça, reduzindo custo de múltiplos LoadBalancers.
+- Investigar réplica de leitura (read replica) do banco de dados para melhorar disponibilidade e distribuir carga de consultas.
+- Configurar alertas de custo (budget alerts) na Magalu Cloud para acompanhamento proativo do FinOps.
+- Avaliar necessidade de segmentação em microsserviços caso o domínio de negócio (pedidos, itens, pagamentos) cresça em complexidade.
